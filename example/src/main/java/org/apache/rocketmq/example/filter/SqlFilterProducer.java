@@ -37,6 +37,8 @@ public class SqlFilterProducer {
                 tags[i % tags.length],
                 ("Hello RocketMQ " + i).getBytes(RemotingHelper.DEFAULT_CHARSET)
             );
+
+            // 用来做SQL过滤的自定义属性
             msg.putUserProperty("a", String.valueOf(i));
 
             SendResult sendResult = producer.send(msg);

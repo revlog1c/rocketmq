@@ -21,6 +21,7 @@ import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.apache.rocketmq.example.NameSrvEnum;
 
 import java.util.List;
 
@@ -29,8 +30,10 @@ public class ScheduledMessageConsumer {
     public static void main(String[] args) throws Exception {
         // Instantiate message consumer
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("ExampleConsumer");
+
+        consumer.setNamesrvAddr(NameSrvEnum.DEV_SRV.getAddr());
         // Subscribe topics
-        consumer.subscribe("TestTopic", "*");
+        consumer.subscribe("DelayTestTopic", "*");
         // Register message listener
         consumer.registerMessageListener(new MessageListenerConcurrently() {
             @Override

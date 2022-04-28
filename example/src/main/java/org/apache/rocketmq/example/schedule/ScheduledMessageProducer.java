@@ -18,18 +18,24 @@ package org.apache.rocketmq.example.schedule;
 
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.common.message.Message;
+import org.apache.rocketmq.example.NameSrvEnum;
 
 public class ScheduledMessageProducer {
     public static void main(String[] args) throws Exception {
+
         // Instantiate a producer to send scheduled messages
         DefaultMQProducer producer = new DefaultMQProducer("ExampleProducerGroup");
+        producer.setNamesrvAddr(NameSrvEnum.DEV_SRV.getAddr());
+
         // Launch producer
         producer.start();
         int totalMessagesToSend = 100;
         for (int i = 0; i < totalMessagesToSend; i++) {
-            Message message = new Message("TestTopic", ("Hello scheduled message " + i).getBytes());
-            // This message will be delivered to consumer 10 seconds later.
-            message.setDelayTimeLevel(3);
+            Message message = new Message("DelayTestTopic", ("Hello scheduled message " + i).getBytes());
+            // 传入延时时间的索引号，This message will be delivered to consumer 10 seconds later.
+            // org/apache/rocketmq/store/config/MessageStoreConfig.java
+            // private String messageDelayLevel = "1s 5s 10s 30s 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h";
+            message.setDelayTimeLevel(4);
             // Send the message
             producer.send(message);
         }

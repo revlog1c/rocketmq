@@ -14,43 +14,58 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.rocketmq.example.batch;
 
-package org.apache.rocketmq.example.filter;
-
-import java.util.List;
 import org.apache.rocketmq.client.consumer.DefaultMQPushConsumer;
-import org.apache.rocketmq.client.consumer.MessageSelector;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyContext;
 import org.apache.rocketmq.client.consumer.listener.ConsumeConcurrentlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
+import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.apache.rocketmq.common.message.MessageExt;
 
+import java.util.List;
+
 /**
- * RocketMQ只定义了一些基本语法来支持这个特性。你也可以很容易地扩展它。
- *
- * 数值比较，比如：>，>=，<，<=，BETWEEN，=；
- * 字符比较，比如：=，<>，IN；
- * IS NULL 或者 IS NOT NULL；
- * 逻辑符号 AND，OR，NOT；
- * 常量支持类型为：
- *
- * 数值，比如：123，3.1415；
- * 字符，比如：'abc'，必须用单引号包裹起来；
- * NULL，特殊的常量
- * 布尔值，TRUE 或 FALSE
- * 只有使用push模式的消费者才能用使用SQL92标准的sql语句，接口如下：
+ * This example shows how to subscribe and consume messages using providing {@link DefaultMQPushConsumer}.
  */
-public class SqlFilterConsumer {
+public class BatchConsumer {
 
-    public static void main(String[] args) throws Exception {
+    static final String NAME_SRV = "132.126.3.240:9876";
+    static final String TOPIC = "BatchTest";
 
-        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("please_rename_unique_group_name");
+    public static void main(String[] args) throws InterruptedException, MQClientException {
 
-        // Don't forget to set enablePropertyFilter=true in broker
-        consumer.subscribe("SqlFilterTest",
-            MessageSelector.bySql("(TAGS is not null and TAGS in ('TagA', 'TagB'))" +
-                "and (a is not null and a between 0 and 3)"));
+        /*
+         * Instantiate with specified consumer group name.
+         */
+        DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("c_batch_group");
 
+        /*
+         * Specify name server addresses.
+         * <p/>
+         *
+         * Alternatively, you may specify name server addresses via exporting environmental variable: NAMESRV_ADDR
+         * <pre>
+         * {@code
+         * consumer.setNamesrvAddr("name-server1-ip:9876;name-server2-ip:9876");
+         * }
+         * </pre>
+         */
+        consumer.setNamesrvAddr(NAME_SRV);
+        /*
+         * Specify where to start in case the specific consumer group is a brand-new one.
+         */
+        consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
+
+        /*
+         * Subscribe one more topic to consume.
+         */
+        consumer.subscribe(TOPIC, "*");
+
+        /*
+         *  Register callback to execute on arrival of messages fetched from brokers.
+         */
         consumer.registerMessageListener(new MessageListenerConcurrently() {
 
             @Override
@@ -61,7 +76,11 @@ public class SqlFilterConsumer {
             }
         });
 
+        /*
+         *  Launch the consumer instance.
+         */
         consumer.start();
+
         System.out.printf("Consumer Started.%n");
     }
 }

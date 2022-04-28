@@ -23,12 +23,20 @@ import java.util.List;
 import java.util.Map;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
 import org.apache.rocketmq.common.message.Message;
+import org.apache.rocketmq.example.NameSrvEnum;
 
+/**
+ * 批量发送消息能显著提高传递小消息的性能。
+ * 限制是这些批量消息应该有相同的topic，相同的waitStoreMsgOK，而且不能是延时消息。
+ * 此外，这一批消息的总大小不应超过4MB。
+ */
 public class SplitBatchProducer {
 
     public static void main(String[] args) throws Exception {
 
         DefaultMQProducer producer = new DefaultMQProducer("BatchProducerGroupName");
+        producer.setNamesrvAddr(NameSrvEnum.DEV_SRV.getAddr());
+        producer.setSendMsgTimeout(10000);
         producer.start();
 
         //large batch
@@ -48,8 +56,8 @@ public class SplitBatchProducer {
 
 }
 
-class ListSplitter implements Iterator<List<Message>> {
-    private int sizeLimit = 1000 * 1000;
+/*class ListSplitter implements Iterator<List<Message>> {
+    private int sizeLimit = 1024 * 1024 * 4;
     private final List<Message> messages;
     private int currIndex;
 
@@ -93,6 +101,53 @@ class ListSplitter implements Iterator<List<Message>> {
         List<Message> subList = messages.subList(currIndex, nextIndex);
         currIndex = nextIndex;
         return subList;
+    }*/
+
+class ListSplitter implements Iterator<List<Message>> {
+    private final int SIZE_LIMIT = 1000 * 1000;
+    private final List<Message> messages;
+    private int currIndex;
+    public ListSplitter(List<Message> messages) {
+        this.messages = messages;
+    }
+    @Override public boolean hasNext() {
+        return currIndex < messages.size();
+    }
+    @Override public List<Message> next() {
+        int startIndex = getStartIndex();
+        int nextIndex = startIndex;
+        int totalSize = 0;
+        for (; nextIndex < messages.size(); nextIndex++) {
+            Message message = messages.get(nextIndex);
+            int tmpSize = calcMessageSize(message);
+            if (tmpSize + totalSize > SIZE_LIMIT) {
+                break;
+            } else {
+                totalSize += tmpSize;
+            }
+        }
+        List<Message> subList = messages.subList(startIndex, nextIndex);
+        currIndex = nextIndex;
+        return subList;
+    }
+    private int getStartIndex() {
+        Message currMessage = messages.get(currIndex);
+        int tmpSize = calcMessageSize(currMessage);
+        while(tmpSize > SIZE_LIMIT) {
+            currIndex += 1;
+            Message message = messages.get(currIndex);
+            tmpSize = calcMessageSize(message);
+        }
+        return currIndex;
+    }
+    private int calcMessageSize(Message message) {
+        int tmpSize = message.getTopic().length() + message.getBody().length;
+        Map<String, String> properties = message.getProperties();
+        for (Map.Entry<String, String> entry : properties.entrySet()) {
+            tmpSize += entry.getKey().length() + entry.getValue().length();
+        }
+        tmpSize = tmpSize + 20; // 增加⽇日志的开销20字节
+        return tmpSize;
     }
 
     @Override
