@@ -26,81 +26,31 @@ import org.apache.rocketmq.remoting.common.RemotingHelper;
 /**
  * This class demonstrates how to send messages to brokers using provided {@link DefaultMQProducer}.
  */
-public class Producer {
+public class SyncProducer {
     public static void main(String[] args) throws MQClientException, InterruptedException {
 
-        /*
-         * Instantiate with a producer group name.
-         */
+        // 初始化生产者，指定生产者组名
         DefaultMQProducer producer = new DefaultMQProducer("test_group");
 
         /*
-         * Specify name server addresses.
-         * <p/>
-         *
-         * Alternatively, you may specify name server addresses via exporting environmental variable: NAMESRV_ADDR
-         * <pre>
-         * {@code
-         * producer.setNamesrvAddr("name-server1-ip:9876;name-server2-ip:9876");
-         * }
-         * </pre>
+         * 指定name server地址
+         * 还可以通过配置环境变量NAMESRV_ADDR来指定，rocketmq会优先使用代码里的配置
          */
-
         producer.setNamesrvAddr(NameSrvEnum.DEV_SRV.getAddr());
 
-        /*
-         * Launch the instance.
-         */
+        // 启动生产者实例
         producer.start();
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 5; i++) {
             try {
-
-                /*
-                 * Create a message instance, specifying topic, tag and message body.
-                 */
-                Message msg = new Message("TopicTest" /* Topic */,
-                    "TagB" /* Tag */,
+                // 创建消息实例，指定topic,tag和消息体
+                Message msg = new Message("SyncTest" /* Topic */,
+                    "TagA" /* Tag */,
                     ("Hello RocketMQ " + i).getBytes(RemotingHelper.DEFAULT_CHARSET) /* Message body */
                 );
 
-                /*
-                 * Call send message to deliver message to one of brokers.
-                 */
+                // 发送消息到一个broker, 此重载方法为同步发送.
                 SendResult sendResult = producer.send(msg);
-                /*
-                 * There are different ways to send message, if you don't care about the send result,you can use this way
-                 * {@code
-                 * producer.sendOneway(msg);
-                 * }
-                 */
-
-                /*
-                 * if you want to get the send result in a synchronize way, you can use this send method
-                 * {@code
-                 * SendResult sendResult = producer.send(msg);
-                 * System.out.printf("%s%n", sendResult);
-                 * }
-                 */
-
-                /*
-                 * if you want to get the send result in a asynchronize way, you can use this send method
-                 * {@code
-                 *
-                 *  producer.send(msg, new SendCallback() {
-                 *  @Override
-                 *  public void onSuccess(SendResult sendResult) {
-                 *      // do something
-                 *  }
-                 *
-                 *  @Override
-                 *  public void onException(Throwable e) {
-                 *      // do something
-                 *  }
-                 *});
-                 *
-                 *}
-                 */
 
                 System.out.printf("%s%n", sendResult);
             } catch (Exception e) {

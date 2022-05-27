@@ -6,6 +6,7 @@ import org.apache.rocketmq.client.consumer.listener.ConsumeOrderlyStatus;
 import org.apache.rocketmq.client.consumer.listener.MessageListenerOrderly;
 import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.apache.rocketmq.example.NameSrvEnum;
 
 import java.util.List;
 import java.util.Random;
@@ -15,15 +16,15 @@ public class OrderConsumer {
 
     public static void main(String[] args) throws Exception {
         DefaultMQPushConsumer consumer = new DefaultMQPushConsumer("c_order_test_group");
-        consumer.setNamesrvAddr("192.168.199.129:9876");
+        consumer.setNamesrvAddr(NameSrvEnum.DEV_SRV.getAddr());
         /**
          * 设置Consumer第一次启动是从队列头部开始消费还是队列尾部开始消费<br>
          * 如果非第一次启动，那么按照上次消费的位置继续消费
          */
         consumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
 
-        // consumer.subscribe("TopicTestOrder", "TagA || TagC || TagD");
-        consumer.subscribe("TopicTestOrder", "TagC");
+        consumer.subscribe("OrderTest", "TagA || TagC || TagD");
+        // consumer.subscribe("TopicTestOrder", "TagC");
 
         consumer.registerMessageListener(new MessageListenerOrderly() {
 

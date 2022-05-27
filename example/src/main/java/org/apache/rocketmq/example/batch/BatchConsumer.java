@@ -23,6 +23,7 @@ import org.apache.rocketmq.client.consumer.listener.MessageListenerConcurrently;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.apache.rocketmq.common.message.MessageExt;
+import org.apache.rocketmq.example.NameSrvEnum;
 
 import java.util.List;
 
@@ -31,7 +32,6 @@ import java.util.List;
  */
 public class BatchConsumer {
 
-    static final String NAME_SRV = "132.126.3.240:9876";
     static final String TOPIC = "BatchTest";
 
     public static void main(String[] args) throws InterruptedException, MQClientException {
@@ -52,7 +52,7 @@ public class BatchConsumer {
          * }
          * </pre>
          */
-        consumer.setNamesrvAddr(NAME_SRV);
+        consumer.setNamesrvAddr(NameSrvEnum.DEV_SRV.getAddr());
         /*
          * Specify where to start in case the specific consumer group is a brand-new one.
          */

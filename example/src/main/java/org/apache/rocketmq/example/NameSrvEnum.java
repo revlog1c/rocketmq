@@ -8,6 +8,7 @@ package org.apache.rocketmq.example;
 public enum NameSrvEnum {
 
     DEV_SRV("132.126.3.240:9876");
+    //DEV_SRV("192.168.75.111:9876");
 
     NameSrvEnum(String addr) {
         this.addr = addr;

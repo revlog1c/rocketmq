@@ -5,6 +5,7 @@ import org.apache.rocketmq.client.producer.MessageQueueSelector;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.common.message.MessageQueue;
+import org.apache.rocketmq.example.NameSrvEnum;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -13,9 +14,9 @@ import java.util.List;
 
 public class OderProducer {
     public static void main(String[] args) throws Exception {
-        DefaultMQProducer producer = new DefaultMQProducer("order_group");
+        DefaultMQProducer producer = new DefaultMQProducer("c_order_group");
 
-        producer.setNamesrvAddr("192.168.199.129:9876");
+        producer.setNamesrvAddr(NameSrvEnum.DEV_SRV.getAddr());
 
         producer.start();
 
@@ -31,7 +32,7 @@ public class OderProducer {
             // 加个时间前缀
             String body = dateStr + " Hello RocketMQ " + orderList.get(i);
             long tagIndex = orderList.get(i).getOrderId() % tags.length;
-            Message msg = new Message("TopicTestOrder", tags[(int)tagIndex], "KEY" + i, body.getBytes());
+            Message msg = new Message("OrderTest", tags[(int)tagIndex], "KEY" + i, body.getBytes());
 
             SendResult sendResult = producer.send(msg, new MessageQueueSelector() {
                 @Override
@@ -90,52 +91,52 @@ public class OderProducer {
         List<OrderStep> orderList = new ArrayList<OrderStep>();
 
         OrderStep orderDemo = new OrderStep();
-        orderDemo.setOrderId(15103111039L);
+        orderDemo.setOrderId(1001L);
         orderDemo.setDesc("创建");
         orderList.add(orderDemo);
 
         orderDemo = new OrderStep();
-        orderDemo.setOrderId(15103111065L);
+        orderDemo.setOrderId(1002L);
         orderDemo.setDesc("创建");
         orderList.add(orderDemo);
 
         orderDemo = new OrderStep();
-        orderDemo.setOrderId(15103111039L);
+        orderDemo.setOrderId(1001L);
         orderDemo.setDesc("付款");
         orderList.add(orderDemo);
 
         orderDemo = new OrderStep();
-        orderDemo.setOrderId(15103117235L);
+        orderDemo.setOrderId(1003L);
         orderDemo.setDesc("创建");
         orderList.add(orderDemo);
 
         orderDemo = new OrderStep();
-        orderDemo.setOrderId(15103111065L);
+        orderDemo.setOrderId(1002L);
         orderDemo.setDesc("付款");
         orderList.add(orderDemo);
 
         orderDemo = new OrderStep();
-        orderDemo.setOrderId(15103117235L);
+        orderDemo.setOrderId(1003L);
         orderDemo.setDesc("付款");
         orderList.add(orderDemo);
 
         orderDemo = new OrderStep();
-        orderDemo.setOrderId(15103111065L);
+        orderDemo.setOrderId(1002L);
         orderDemo.setDesc("完成");
         orderList.add(orderDemo);
 
         orderDemo = new OrderStep();
-        orderDemo.setOrderId(15103111039L);
+        orderDemo.setOrderId(1001L);
         orderDemo.setDesc("推送");
         orderList.add(orderDemo);
 
         orderDemo = new OrderStep();
-        orderDemo.setOrderId(15103117235L);
+        orderDemo.setOrderId(1003L);
         orderDemo.setDesc("完成");
         orderList.add(orderDemo);
 
         orderDemo = new OrderStep();
-        orderDemo.setOrderId(15103111039L);
+        orderDemo.setOrderId(1001L);
         orderDemo.setDesc("完成");
         orderList.add(orderDemo);
 

@@ -769,6 +769,7 @@ public class CommitLog {
         MessageExtEncoder batchEncoder = pmThreadLocal.getEncoder();
 
         PutMessageContext putMessageContext = new PutMessageContext(generateKey(pmThreadLocal.getKeyBuilder(), messageExtBatch));
+        // 在这里校验的消息体长度
         messageExtBatch.setEncodedBuff(batchEncoder.encode(messageExtBatch, putMessageContext));
 
         putMessageLock.lock();
